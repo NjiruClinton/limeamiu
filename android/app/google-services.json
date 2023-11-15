@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "593641195579",
+    "project_id": "amiu-f4ae1",
+    "storage_bucket": "amiu-f4ae1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593641195579:android:0ef18f22d6331de9d1f41e",
+        "android_client_info": {
+          "package_name": "com.example.lime"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "593641195579-ukb9npdr6ncv29av9cerdh6kg351m8pg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb1joQfO686K-iUdLMX4CzhOAE_Pg60zE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "593641195579-ukb9npdr6ncv29av9cerdh6kg351m8pg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "593641195579-e9m44a6ubrvqbrlip1l5lrktuhlap50f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.lime"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
