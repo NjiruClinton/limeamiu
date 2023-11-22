@@ -17,6 +17,19 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+
+  // final User? user = FirebaseAuth.instance.currentUser;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   if(user != null){
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => Home()),
+  //     );
+  //   }
+  // }
+
   String? errorMessage = '';
 
   final emailController = TextEditingController();
@@ -99,6 +112,13 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if(user != null){
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => Home()),
+      // );
+    }
     return Scaffold(
         backgroundColor: Colors.grey.shade300,
       body: SafeArea(

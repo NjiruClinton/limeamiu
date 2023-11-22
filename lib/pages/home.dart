@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:lime/pages/patient_records.dart';
 import 'package:lime/pages/sign_in.dart';
 import 'package:lime/pages/triage.dart';
 
@@ -16,27 +19,115 @@ class _HomeState extends State<Home> {
 
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  final User? user = FirebaseAuth.instance.currentUser;
-  // if no user is signed in, navigate to sign in page
-
-  @override
-  void initState() {
-    super.initState();
-    if(user == null){
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SignIn()),
-      );
-    }
-  }
+  // final User? user = FirebaseAuth.instance.currentUser;
+  // // if no user is signed in, navigate to sign in page
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   if(user == null){
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => SignIn()),
+  //     );
+  //   }
+  // }
 
   final _searchController = TextEditingController();
+
+  Future openDialog() async {
+    // define date
+    var selectedDate = DateTime.now();
+    final patientName = TextEditingController();
+    final patientGender = TextEditingController();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Add a patient'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(labelText: 'Name'),
+                  controller: patientName,
+                ),
+                TextField(
+                  decoration: InputDecoration(labelText: 'Gender'),
+                  controller: patientGender,
+                ),
+                // TextField(
+                //   decoration: InputDecoration(labelText: 'Date of Birth'),
+                // ),
+                // show date picker
+                TextButton(
+                  style: TextButton.styleFrom(
+                    elevation: 8,
+                    backgroundColor: Colors.grey.shade200,
+                  ),
+                  onPressed: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+
+                    if (pickedDate != null && pickedDate != selectedDate) {
+                      setState(() {
+                        selectedDate = pickedDate;
+                        print(selectedDate);
+                      });
+                    }
+                  },
+                  child: Text(
+                    'Date of Birth ${DateFormat('dd-MMM-yyyy').format(selectedDate)}',
+                    style: TextStyle(color: Colors.grey.shade800),
+                  ),
+                ),
+                // other fields
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel')
+              ),
+              ElevatedButton(
+                  onPressed: () async {
+                    // add data to firestore collection patients
+                    await FirebaseFirestore.instance.collection('patients').add({
+                      'name': patientName.text,
+                      'gender': patientGender.text,
+                      'dob': selectedDate,
+                      'id': DateTime.now().millisecondsSinceEpoch,
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Add')
+              ),
+            ],
+          );
+        }
+    );
+  }
+
+  // get patients into a list widget
+
+
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
     if(user != null){
       loggedIn = true;
     } else {
       loggedIn = false;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SignIn()),
+      );
     }
     return Scaffold(
       appBar: AppBar(title: Text('Home'),
@@ -51,7 +142,7 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Add your onPressed code here!
+          openDialog();
         },
         label: Text('Add a patient'),
         icon: Icon(Icons.add),
@@ -103,7 +194,7 @@ class _HomeState extends State<Home> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Triage()),
+                  MaterialPageRoute(builder: (context) => Home()), //Triage
                 );
               },
             ),
@@ -254,6 +345,80 @@ class _HomeState extends State<Home> {
             ),
           ),
 
+        // SizedBox(height: 10),
+        SizedBox(
+          height: 300,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('patients')
+                .where('name', isGreaterThanOrEqualTo: _searchController.text)
+                .where('name', isLessThan: _searchController.text + 'z')
+                .orderBy('name')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return CircularProgressIndicator();
+              }
+
+              var patients = snapshot.data!.docs;
+
+              return ListView.separated(
+                itemCount: patients.length,
+                itemBuilder: (context, index) {
+                  var patient = patients[index].data() as Map<String, dynamic>;
+
+                  return ListTile(
+                    title: Text(
+                      patient['name'],
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Gender: ${patient['gender']} \nDOB: ${DateFormat('dd-MMM-yyyy').format(patient['dob'].toDate())}',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {
+                        // show menu
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return Container(
+                              height: 200,
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(Icons.view_agenda_rounded),
+                                    title: Text('View Patient'),
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder:
+                                      (context) => PatientRecords(patient: patient,)));
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.chat_rounded),
+                                    title: Text('Triage Assessment'),
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder:
+                                          (context) => Triage(patient: patient,)));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    dense: true,
+                    contentPadding: EdgeInsets.all(16),
+                  );
+                }, separatorBuilder: (BuildContext context, int index) { return Divider(); },
+              );
+            },
+          ),
+        ),
+          SizedBox(height: 50,)
         ],
       )
     );

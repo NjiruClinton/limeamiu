@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -20,8 +21,8 @@ class Message {
 }
 
 class Triage extends StatefulWidget {
-  const Triage({super.key});
-
+  Triage({super.key, required this.patient});
+  final Map<String, dynamic> patient;
   @override
   State<Triage> createState() => _TriageState();
 }
@@ -29,49 +30,81 @@ class Triage extends StatefulWidget {
 class _TriageState extends State<Triage> {
 
 
+
   Future<void> getResponse(String prompt) async {
     var response = await http.post(
-        Uri.parse('https://0f34-154-78-227-54.ngrok-free.app/chatbot'),
+        Uri.parse('http://clintonnjiru.pythonanywhere.com/chat'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'prompt': prompt})
+        body: jsonEncode({'sentence': prompt})
     );
     String botResponse = jsonDecode(response.body)['response'];
     print("response: $botResponse");
-    setState(() {
-      messages.add(
-          Message(
-              text: botResponse,
-              date: DateTime.now(),
-              isSentByMe: false
-          )
-      );
+    // add to firestore collection triage with patient id
+    await FirebaseFirestore.instance.collection('triage').add({
+      'patient_id': widget.patient['id'],
+      'text': botResponse,
+      'date': DateTime.now(),
+      'isSentByMe': false
     });
+    getMessages();
   }
 
-  List<Message> messages = [
+  List<Message> messages = [];
 
-    Message(
-      text: 'John Doe',
-      date: DateTime.now(),
-      isSentByMe: true,
-    ),
-    Message(
-      text: 'Jane Doe',
-      date: DateTime.now(),
-      isSentByMe: false,
-    ),
-    Message(
-      text: 'John Doe',
-      date: DateTime.now(),
-      isSentByMe: true,
-    ),
-  ].reversed.toList();
+  @override
+  void initState() {
+    super.initState();
+    getMessages();
+  }
 
-@override
+  void getMessages() async {
+
+    final snapshots = await FirebaseFirestore.instance
+        .collection('triage')
+        .where('patient_id', isEqualTo: widget.patient['id'])
+        .get();
+
+    messages = snapshots.docs.map((doc) {
+      return Message(
+          text: doc['text'],
+          date: doc['date'].toDate(),
+          isSentByMe: doc['isSentByMe']
+      );
+    }).toList().reversed.toList();
+
+    setState(() {});
+
+  }
+
+  TextEditingController controller = TextEditingController();
+
+  void onSendPressed(String text) async{
+    final message = Message(
+        text: text,
+        date: DateTime.now(),
+        isSentByMe: true
+    );
+    setState(() {
+      // messages.add(message);
+    });
+    //   also add to firestore collection triage with patient id
+    await FirebaseFirestore.instance.collection('triage').add({
+      'patient_id': widget.patient['id'],
+      'text': text,
+      'date': DateTime.now(),
+      'isSentByMe': true
+    });
+    await getResponse(text);
+  }
+
+
+  @override
   Widget build(BuildContext context) {
+  print(widget.patient['name']);
+  print(widget.patient['id']);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Triage'),
+        title: Text('Triage assessment for ${widget.patient['name']}'),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(4.0),
           child: Container(
@@ -125,20 +158,21 @@ class _TriageState extends State<Triage> {
           Container(
             color: Colors.grey.shade300,
             child: TextField(
+              controller: controller,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(12),
-                hintText: 'Type your message here...',
+                hintText: 'Type symptoms here...',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () async {
+                    onSendPressed(controller.text);
+                    controller.clear();
+                  }
+                )
               ),
                 onSubmitted: (text) async {
-                  final message = Message(
-                      text: text,
-                      date: DateTime.now(),
-                      isSentByMe: true
-                  );
-                  setState(() {
-                    messages.add(message);
-                  });
-                  await getResponse(text);
+                  onSendPressed(text);
+                  controller.clear();
                 }
             ),
           ),
