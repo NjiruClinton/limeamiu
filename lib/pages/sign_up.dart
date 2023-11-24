@@ -1,11 +1,10 @@
 import 'package:lime/pages/sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../auth.dart';
-import '../components/my_button.dart';
-import '../components/my_textfield.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../components/my_textfield.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -57,7 +56,7 @@ class _SignUpState extends State<SignUp> {
   }
 
   Widget _errorMessage(){
-    return Text(errorMessage == "" ? "" : 'Humm $errorMessage', style: TextStyle(color: Colors.redAccent),);
+    return Text(errorMessage == "" ? "" : 'Humm $errorMessage', style: const TextStyle(color: Colors.redAccent),);
   }
 
   // void signUserUp() {
@@ -84,44 +83,45 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
-      body: SafeArea(
+      body:
+      SafeArea(
           child: SingleChildScrollView(
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 50,),
-                  Icon(Icons.lock, size: 100,),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50,),
+                  const Icon(Icons.lock, size: 100,),
+                  const SizedBox(height: 50,),
                   Text("Welcome to Lime! Please sign up here.",
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade700),),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50,),
                   _errorMessage(),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   MyTextField(
                     controller: emailController,
                     hintText: "Email",
                     obscureText: false,
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   MyTextField(
                     controller: usernameController,
                     hintText: "Username",
                     obscureText: false,
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   MyTextField(
                     controller: passwordController,
                     hintText: "Password",
                     obscureText: true,
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   MyTextField(
                     controller: passwordController2,
                     hintText: "Confirm Password",
                     obscureText: true,
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Row(
@@ -131,15 +131,15 @@ class _SignUpState extends State<SignUp> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 25,),
+                  const SizedBox(height: 25,),
               GestureDetector(
                 onTap: signupUser,
                 child: Container(
-                    padding: EdgeInsets.all(25),
-                    margin: EdgeInsets.symmetric(horizontal: 25),
+                    padding: const EdgeInsets.all(25),
+                    margin: const EdgeInsets.symmetric(horizontal: 25),
                     decoration: BoxDecoration(color: Colors.black,
                         borderRadius: BorderRadius.circular(8)),
-                    child: Center(
+                    child: const Center(
                         child: Text(
                           "Sign Up",
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
@@ -147,7 +147,7 @@ class _SignUpState extends State<SignUp> {
                     )
                 ),
               ),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50,),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Row(
@@ -171,7 +171,7 @@ class _SignUpState extends State<SignUp> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -180,7 +180,7 @@ class _SignUpState extends State<SignUp> {
                           signInWithGoogle();
                         },
                         child: Container(
-                            padding: EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.white),
                               borderRadius: BorderRadius.circular(16),
@@ -190,12 +190,12 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("Already a member?", style: TextStyle(color: Colors.grey.shade700),),
-                      SizedBox(width: 4,),
+                      const SizedBox(width: 4,),
                       GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -204,7 +204,7 @@ class _SignUpState extends State<SignUp> {
                             );
                           },
 
-                          child: Text("Login now", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),)),
+                          child: const Text("Login now", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),)),
                     ],
                   )
                 ],

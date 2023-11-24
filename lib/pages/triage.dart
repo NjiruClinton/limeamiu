@@ -72,6 +72,9 @@ class _TriageState extends State<Triage> {
       );
     }).toList().reversed.toList();
 
+    // messages.reversed;
+    // sort messages by datetime
+    messages.sort((a, b) => a.date.compareTo(b.date));
     setState(() {});
 
   }
